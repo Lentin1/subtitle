@@ -35,11 +35,11 @@ public partial class SubtitleWindow : Window
         if (options.BackgroundEnabled)
         {
             var opacity = Math.Clamp(options.BackgroundOpacity, 0, 1);
-            Container.Background = new SolidColorBrush(Color.FromArgb((byte)(opacity * 255), 0, 0, 0));
+            Container.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb((byte)(opacity * 255), 0, 0, 0));
         }
         else
         {
-            Container.Background = Brushes.Transparent;
+            Container.Background = System.Windows.Media.Brushes.Transparent;
         }
     }
 
@@ -84,15 +84,15 @@ public partial class SubtitleWindow : Window
         DragMove();
     }
 
-    private static Color TryParseColor(string value)
+    private static System.Windows.Media.Color TryParseColor(string value)
     {
         try
         {
-            return (Color)(ColorConverter.ConvertFromString(value) ?? Colors.White);
+            return (System.Windows.Media.Color)(System.Windows.Media.ColorConverter.ConvertFromString(value) ?? System.Windows.Media.Colors.White);
         }
         catch (FormatException)
         {
-            return Colors.White;
+            return System.Windows.Media.Colors.White;
         }
     }
 }

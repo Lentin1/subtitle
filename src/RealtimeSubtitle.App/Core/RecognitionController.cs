@@ -1,7 +1,7 @@
-using System.Windows;
 using RealtimeSubtitle.App.Audio;
 using RealtimeSubtitle.App.Ipc;
 using RealtimeSubtitle.App.UI;
+using WpfApplication = System.Windows.Application;
 
 namespace RealtimeSubtitle.App.Core;
 
@@ -49,8 +49,8 @@ public sealed class RecognitionController : IAsyncDisposable
 
             _worker = new PythonWorkerClient(_configService.ResolvePath(_config.Worker.ScriptPath), _config.Worker.PythonPath);
             _worker.SubtitleReceived += OnSubtitleReceived;
-            _worker.StatusReceived += status => Application.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(status));
-            _worker.ErrorReceived += error => Application.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(error));
+            _worker.StatusReceived += status => WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(status));
+            _worker.ErrorReceived += error => WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(error));
 
             await _worker.StartAsync(_config);
             _capture.Start();
@@ -114,7 +114,7 @@ public sealed class RecognitionController : IAsyncDisposable
     private async Task ExitAsync()
     {
         await DisposeAsync();
-        Application.Current.Shutdown();
+        WpfApplication.Current.Shutdown();
     }
 
     private void OnAudioAvailable(object? sender, AudioChunk chunk)
@@ -130,7 +130,7 @@ public sealed class RecognitionController : IAsyncDisposable
 
     private void OnSubtitleReceived(SubtitleEvent subtitle)
     {
-        Application.Current.Dispatcher.Invoke(() => _subtitleWindow.UpdateSubtitle(subtitle.Japanese, subtitle.Chinese));
+        WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.UpdateSubtitle(subtitle.Japanese, subtitle.Chinese));
     }
 
     public async ValueTask DisposeAsync()
