@@ -73,8 +73,8 @@ public sealed class AudioSessionWatcher : IDisposable
             }
 
             _apps = apps
-                .GroupBy(app => app.ProcessName, StringComparer.OrdinalIgnoreCase)
-                .Select(group => group.OrderByDescending(app => app.IsActive).First())
+                .GroupBy(app => app.ProcessId)
+                .Select(group => group.OrderByDescending(app => app.IsActive).ThenBy(app => app.DisplayName, StringComparer.OrdinalIgnoreCase).First())
                 .OrderByDescending(app => app.IsActive)
                 .ThenBy(app => app.DisplayName, StringComparer.OrdinalIgnoreCase)
                 .ToArray();

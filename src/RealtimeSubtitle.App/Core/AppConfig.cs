@@ -21,6 +21,7 @@ public sealed class AudioOptions
 {
     public string Mode { get; set; } = "device_loopback";
     public string TargetApp { get; set; } = "";
+    public int TargetProcessId { get; set; }
     public bool AutoRefreshApps { get; set; } = true;
 }
 

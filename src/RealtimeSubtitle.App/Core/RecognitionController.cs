@@ -59,7 +59,7 @@ public sealed class RecognitionController : IAsyncDisposable
             await _worker.StartAsync(_config);
             _capture = CreateCapture();
             _capture.AudioAvailable += OnAudioAvailable;
-            _capture.Start();
+            await Task.Run(() => _capture.Start());
             _isRunning = true;
             _tray?.SetRunning(true);
             _subtitleWindow.ShowStatus(GetListeningStatus());
@@ -151,7 +151,12 @@ public sealed class RecognitionController : IAsyncDisposable
     {
         if (string.Equals(_config.Audio.Mode, "process_loopback", StringComparison.OrdinalIgnoreCase))
         {
-            return new ProcessLoopbackCapture(_sessionWatcher, () => _config.Audio.TargetApp);
+            if (_config.Audio.TargetProcessId <= 0)
+            {
+                throw new InvalidOperationException("请先在设置里选择目标进程。");
+            }
+
+            return new ProcessLoopbackCapture(_config.Audio.TargetProcessId);
         }
 
         return new DeviceLoopbackCapture();
@@ -160,9 +165,15 @@ public sealed class RecognitionController : IAsyncDisposable
     private string GetListeningStatus()
     {
         if (string.Equals(_config.Audio.Mode, "process_loopback", StringComparison.OrdinalIgnoreCase) &&
-            !string.IsNullOrWhiteSpace(_config.Audio.TargetApp))
+            _config.Audio.TargetProcessId > 0)
         {
-            return $"正在监听应用声音: {_config.Audio.TargetApp}";
+            var app = _sessionWatcher.Apps.FirstOrDefault(item => item.ProcessId == _config.Audio.TargetProcessId);
+            if (app is not null)
+            {
+                return $"正在监听进程声音: {app.DisplayName} (PID {app.ProcessId})";
+            }
+
+            return $"正在监听进程声音: PID {_config.Audio.TargetProcessId}";
         }
 
         return "正在监听系统声音";

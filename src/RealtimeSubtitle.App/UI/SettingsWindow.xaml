@@ -21,7 +21,7 @@
           </ComboBox>
         </StackPanel>
         <StackPanel Grid.Column="1">
-          <TextBlock Text="目标应用" FontWeight="SemiBold" />
+          <TextBlock Text="目标进程" FontWeight="SemiBold" />
           <ComboBox x:Name="TargetAppBox" IsEditable="True" Margin="0,6,0,0" />
         </StackPanel>
       </Grid>
@@ -144,7 +144,7 @@
 
       <CheckBox x:Name="DebugLogCheck" Content="启用调试日志" Margin="0,0,0,18" />
 
-      <TextBlock Text="按应用监听会自动刷新当前有音频会话的应用。当前实现是应用活动门控，仍基于系统 loopback 音频；同一时间其他应用发声仍可能混入。"
+      <TextBlock Text="按应用监听会自动刷新当前有音频会话的进程。真正的进程环回采集依赖 Windows 10 Build 20348+。"
                  TextWrapping="Wrap"
                  Foreground="#666666"
                  Margin="0,0,0,18" />
