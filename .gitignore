@@ -1,15 +1,50 @@
+# Build outputs
 bin/
 obj/
-.vs/
-.venv/
-__pycache__/
-*.pyc
-
-config/config.json
-logs/
-models/
 dist/
 artifacts/
+publish/
 
+# IDE and user-local state
+.vs/
+.vscode/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
+
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime data
+logs/
+*.log
+models/
+*.wav
+*.mp3
+*.flac
+*.pcm
+
+# Local configuration and secrets
+config/config.json
+config/config.*.json
+!config/default_config.json
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+
+# Windows
+Thumbs.db
+Desktop.ini
