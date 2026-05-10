@@ -13,14 +13,19 @@
     "device": "cuda",
     "computeType": "float16",
     "stableSilenceMs": 900,
-    "maxSegmentSeconds": 10
+    "maxSegmentSeconds": 4,
+    "partialIntervalSeconds": 0.8,
+    "partialMinSeconds": 1.2,
+    "partialMaxSeconds": 2.8
   },
   "translate": {
     "provider": "deepseek",
     "model": "deepseek-chat",
     "apiKey": "",
     "contextSentences": 5,
-    "timeoutSeconds": 5
+    "timeoutSeconds": 5,
+    "partialTranslateEnabled": true,
+    "partialTranslateMinChars": 8
   },
   "subtitle": {
     "fontSizeJa": 30,

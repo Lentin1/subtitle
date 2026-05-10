@@ -58,7 +58,11 @@ public partial class SubtitleWindow : Window
     public void UpdateSubtitle(string japanese, string chinese)
     {
         JapaneseText.Text = string.IsNullOrWhiteSpace(japanese) ? JapaneseText.Text : japanese;
-        ChineseText.Text = chinese;
+        if (!string.IsNullOrWhiteSpace(chinese))
+        {
+            ChineseText.Text = chinese;
+        }
+
         Show();
         ResetAutoHideTimer();
     }

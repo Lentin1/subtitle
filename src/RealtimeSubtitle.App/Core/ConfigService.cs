@@ -47,6 +47,13 @@ public sealed class ConfigService
 
     private static string FindRepositoryRoot()
     {
+        var baseDirectory = AppContext.BaseDirectory;
+        if (File.Exists(Path.Combine(baseDirectory, "config", "config.json")) ||
+            Directory.Exists(Path.Combine(baseDirectory, "worker")))
+        {
+            return baseDirectory;
+        }
+
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {

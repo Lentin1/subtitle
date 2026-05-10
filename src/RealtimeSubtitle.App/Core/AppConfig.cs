@@ -29,7 +29,10 @@ public sealed class AsrOptions
     public string Device { get; set; } = "cuda";
     public string ComputeType { get; set; } = "float16";
     public int StableSilenceMs { get; set; } = 900;
-    public int MaxSegmentSeconds { get; set; } = 10;
+    public int MaxSegmentSeconds { get; set; } = 4;
+    public double PartialIntervalSeconds { get; set; } = 0.8;
+    public double PartialMinSeconds { get; set; } = 1.2;
+    public double PartialMaxSeconds { get; set; } = 2.8;
 }
 
 public sealed class TranslateOptions
@@ -39,6 +42,8 @@ public sealed class TranslateOptions
     public string ApiKey { get; set; } = "";
     public int ContextSentences { get; set; } = 5;
     public int TimeoutSeconds { get; set; } = 5;
+    public bool PartialTranslateEnabled { get; set; } = true;
+    public int PartialTranslateMinChars { get; set; } = 8;
 }
 
 public sealed class SubtitleOptions
