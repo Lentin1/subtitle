@@ -1,0 +1,39 @@
+{
+  "app": {
+    "autoStart": false,
+    "debugLog": false
+  },
+  "audio": {
+    "mode": "device_loopback"
+  },
+  "asr": {
+    "mode": "high_accuracy",
+    "model": "large-v3-turbo",
+    "language": "ja",
+    "device": "cuda",
+    "computeType": "float16",
+    "stableSilenceMs": 900,
+    "maxSegmentSeconds": 10
+  },
+  "translate": {
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "apiKey": "",
+    "contextSentences": 5,
+    "timeoutSeconds": 5
+  },
+  "subtitle": {
+    "fontSizeJa": 30,
+    "fontSizeZh": 32,
+    "fontColor": "#FFFFFF",
+    "backgroundEnabled": true,
+    "backgroundOpacity": 0.45,
+    "width": 960,
+    "height": 170,
+    "autoHideSeconds": 5
+  },
+  "worker": {
+    "pythonPath": "python",
+    "scriptPath": "src/RealtimeSubtitle.Worker/main.py"
+  }
+}

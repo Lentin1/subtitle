@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+.venv/
+__pycache__/
+*.pyc
+
+config/config.json
+logs/
+models/
+
+*.user
+*.suo

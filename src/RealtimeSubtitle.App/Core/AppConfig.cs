@@ -1,0 +1,60 @@
+namespace RealtimeSubtitle.App.Core;
+
+public sealed class AppConfig
+{
+    public AppOptions App { get; set; } = new();
+    public AudioOptions Audio { get; set; } = new();
+    public AsrOptions Asr { get; set; } = new();
+    public TranslateOptions Translate { get; set; } = new();
+    public SubtitleOptions Subtitle { get; set; } = new();
+    public WorkerOptions Worker { get; set; } = new();
+}
+
+public sealed class AppOptions
+{
+    public bool AutoStart { get; set; }
+    public bool DebugLog { get; set; }
+}
+
+public sealed class AudioOptions
+{
+    public string Mode { get; set; } = "device_loopback";
+}
+
+public sealed class AsrOptions
+{
+    public string Mode { get; set; } = "high_accuracy";
+    public string Model { get; set; } = "large-v3-turbo";
+    public string Language { get; set; } = "ja";
+    public string Device { get; set; } = "cuda";
+    public string ComputeType { get; set; } = "float16";
+    public int StableSilenceMs { get; set; } = 900;
+    public int MaxSegmentSeconds { get; set; } = 10;
+}
+
+public sealed class TranslateOptions
+{
+    public string Provider { get; set; } = "deepseek";
+    public string Model { get; set; } = "deepseek-chat";
+    public string ApiKey { get; set; } = "";
+    public int ContextSentences { get; set; } = 5;
+    public int TimeoutSeconds { get; set; } = 5;
+}
+
+public sealed class SubtitleOptions
+{
+    public double FontSizeJa { get; set; } = 30;
+    public double FontSizeZh { get; set; } = 32;
+    public string FontColor { get; set; } = "#FFFFFF";
+    public bool BackgroundEnabled { get; set; } = true;
+    public double BackgroundOpacity { get; set; } = 0.45;
+    public double Width { get; set; } = 960;
+    public double Height { get; set; } = 170;
+    public int AutoHideSeconds { get; set; } = 5;
+}
+
+public sealed class WorkerOptions
+{
+    public string PythonPath { get; set; } = "python";
+    public string ScriptPath { get; set; } = "src/RealtimeSubtitle.Worker/main.py";
+}
