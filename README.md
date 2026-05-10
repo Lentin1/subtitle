@@ -19,24 +19,31 @@ Windows 桌面实时字幕工具，用于播放日语视频时显示日文识别
 ## 方式一：下载发行版
 
 1. 打开本仓库的 GitHub Releases 页面。
-2. 下载类似下面名称的压缩包：
+2. 下载主程序压缩包：
 
 ```text
 RealtimeSubtitle-v2-green.zip
 ```
 
-3. 解压到任意目录。
-4. 运行：
+3. 如果要使用 GPU / CUDA，再下载 CUDA 依赖包：
+
+```text
+RealtimeSubtitle-v2-cuda.zip
+```
+
+4. 先解压 `RealtimeSubtitle-v2-green.zip` 到任意目录。
+5. 如果下载了 CUDA 包，把 `RealtimeSubtitle-v2-cuda.zip` 解压到同一个目录并覆盖。
+6. 运行：
 
 ```text
 RealtimeSubtitle.App.exe
 ```
 
-5. 打开托盘菜单里的“设置”，填写 DeepSeek API Key。
-6. 选择 Whisper 模型，点击“下载/验证模型”。
-7. 保存设置后，托盘菜单点击“开始识别”。
+7. 打开托盘菜单里的“设置”，填写 DeepSeek API Key。
+8. 选择 Whisper 模型，点击“下载/验证模型”。
+9. 保存设置后，托盘菜单点击“开始识别”。
 
-发行版内置 .NET self-contained 主程序、PyInstaller worker 和 CUDA Python DLL 依赖。新机器仍需要安装 NVIDIA 驱动。
+主包内置 .NET self-contained 主程序和 PyInstaller worker。CUDA 包只包含 GPU 运行所需的 Python CUDA DLL。新机器使用 GPU 模式仍需要安装 NVIDIA 驱动。
 
 ## 发行版目录
 
@@ -46,12 +53,17 @@ RealtimeSubtitle.App.exe
 RealtimeSubtitle.App.exe
 config\config.json
 worker\RealtimeSubtitle.Worker.exe
-worker\nvidia\
 models\
 logs\
 ```
 
 `config/config.json` 保存本机设置和 API Key。`models/` 保存下载后的 Whisper 模型。`logs/` 保存调试日志。
+
+如果安装 CUDA 包，目录中还会出现：
+
+```text
+worker\nvidia\
+```
 
 ## 方式二：从源码运行
 
@@ -129,6 +141,6 @@ logs\worker.log
 ## 常见问题
 
 - `Worker IPC 已断开`：发行版检查 `worker\RealtimeSubtitle.Worker.exe`，源码模式检查 `worker.pythonPath`。
-- `cublas64_12.dll is not found`：确认发行版里有 `worker\nvidia`，并且机器已安装 NVIDIA 驱动。
+- `cublas64_12.dll is not found`：下载并覆盖 `RealtimeSubtitle-v2-cuda.zip`，确认存在 `worker\nvidia`，并且机器已安装 NVIDIA 驱动。
 - 按进程监听无声：确认设置里选择的是正在播放声音的进程 ID。
 - 翻译慢：通常是 DeepSeek 网络响应慢；日文识别不会等待翻译完成。
