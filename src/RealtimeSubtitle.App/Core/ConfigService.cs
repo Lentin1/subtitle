@@ -5,7 +5,7 @@ namespace RealtimeSubtitle.App.Core;
 
 public sealed class ConfigService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    public static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -43,6 +43,23 @@ public sealed class ConfigService
     public string ResolvePath(string path)
     {
         return Path.IsPathRooted(path) ? path : Path.GetFullPath(Path.Combine(RepositoryRoot, path));
+    }
+
+    public string ResolveOptionalPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return "";
+        }
+
+        if (!path.Contains(Path.DirectorySeparatorChar) &&
+            !path.Contains(Path.AltDirectorySeparatorChar) &&
+            Path.GetExtension(path).Length == 0)
+        {
+            return path;
+        }
+
+        return ResolvePath(path);
     }
 
     private static string FindRepositoryRoot()

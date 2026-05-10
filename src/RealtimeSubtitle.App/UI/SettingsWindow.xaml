@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="设置"
         Width="640"
-        Height="720"
+        Height="820"
         WindowStartupLocation="CenterOwner">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel Margin="18">
@@ -35,7 +35,12 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Margin="0,0,10,0">
           <TextBlock Text="Whisper 模型" FontWeight="SemiBold" />
-          <TextBox x:Name="ModelText" Margin="0,6,0,0" />
+          <ComboBox x:Name="ModelText" IsEditable="True" Margin="0,6,0,0">
+            <ComboBoxItem Content="small" />
+            <ComboBoxItem Content="medium" />
+            <ComboBoxItem Content="large-v3-turbo" />
+            <ComboBoxItem Content="large-v3" />
+          </ComboBox>
         </StackPanel>
         <StackPanel Grid.Column="1" Margin="0,0,10,0">
           <TextBlock Text="设备" FontWeight="SemiBold" />
@@ -48,6 +53,23 @@
           <TextBlock Text="计算类型" FontWeight="SemiBold" />
           <TextBox x:Name="ComputeTypeText" Margin="0,6,0,0" />
         </StackPanel>
+      </Grid>
+
+      <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="2*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+          <TextBlock Text="模型缓存目录" FontWeight="SemiBold" />
+          <TextBox x:Name="ModelCacheText" Margin="0,6,0,0" />
+        </StackPanel>
+        <Button x:Name="DownloadModelButton"
+                Grid.Column="1"
+                Content="下载/验证模型"
+                Height="30"
+                VerticalAlignment="Bottom"
+                Click="DownloadModel_OnClick" />
       </Grid>
 
       <Grid Margin="0,0,0,16">
@@ -130,6 +152,70 @@
           <TextBox x:Name="OpacityText" Margin="0,6,0,0" />
         </StackPanel>
         <CheckBox x:Name="BackgroundCheck" Grid.Column="2" Content="启用背景" Margin="0,24,0,0" />
+      </Grid>
+
+      <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+          <TextBlock Text="中文字幕颜色" FontWeight="SemiBold" />
+          <TextBox x:Name="ZhFontColorText" Margin="0,6,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+          <TextBlock Text="背景颜色" FontWeight="SemiBold" />
+          <TextBox x:Name="BackgroundColorText" Margin="0,6,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Text="字体" FontWeight="SemiBold" />
+          <TextBox x:Name="FontFamilyText" Margin="0,6,0,0" />
+        </StackPanel>
+      </Grid>
+
+      <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+          <TextBlock Text="圆角" FontWeight="SemiBold" />
+          <TextBox x:Name="CornerRadiusText" Margin="0,6,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+          <TextBlock Text="内边距" FontWeight="SemiBold" />
+          <TextBox x:Name="PaddingText" Margin="0,6,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Text="行距" FontWeight="SemiBold" />
+          <TextBox x:Name="LineSpacingText" Margin="0,6,0,0" />
+        </StackPanel>
+      </Grid>
+
+      <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+          <TextBlock Text="阴影模糊" FontWeight="SemiBold" />
+          <TextBox x:Name="ShadowBlurText" Margin="0,6,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+          <TextBlock Text="阴影透明度" FontWeight="SemiBold" />
+          <TextBox x:Name="ShadowOpacityText" Margin="0,6,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Text="对齐" FontWeight="SemiBold" />
+          <ComboBox x:Name="TextAlignmentBox" Margin="0,6,0,0">
+            <ComboBoxItem Content="Left" />
+            <ComboBoxItem Content="Center" />
+            <ComboBoxItem Content="Right" />
+          </ComboBox>
+        </StackPanel>
       </Grid>
 
       <TextBlock Text="快捷键" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" />

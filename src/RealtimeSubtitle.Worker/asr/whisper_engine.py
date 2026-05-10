@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import site
+import sys
 from typing import Any
 
 import numpy as np
@@ -19,9 +20,16 @@ class WhisperEngine:
         model = str(config.get("model", "large-v3-turbo"))
         device = str(config.get("device", "cuda"))
         compute_type = str(config.get("computeType", "float16"))
+        model_cache_dir = str(config.get("modelCacheDir", "models")).strip()
+        if model_cache_dir and not os.path.isabs(model_cache_dir):
+            model_cache_dir = os.path.abspath(model_cache_dir)
 
         try:
-            self.model = WhisperModel(model, device=device, compute_type=compute_type)
+            kwargs: dict[str, Any] = {"device": device, "compute_type": compute_type}
+            if model_cache_dir:
+                os.makedirs(model_cache_dir, exist_ok=True)
+                kwargs["download_root"] = model_cache_dir
+            self.model = WhisperModel(model, **kwargs)
         except Exception as exc:
             if device == "cuda":
                 raise RuntimeError("CUDA 模型加载失败，可在配置中切换为 CPU 或检查 NVIDIA 驱动/CUDA 依赖") from exc
@@ -58,6 +66,16 @@ def add_nvidia_dll_directories() -> None:
     user_site = site.getusersitepackages()
     if user_site:
         roots.append(user_site)
+    executable_dir = os.path.dirname(sys.executable)
+    roots.extend(
+        root
+        for root in (
+            getattr(sys, "_MEIPASS", ""),
+            executable_dir,
+            os.path.join(executable_dir, "worker"),
+        )
+        if root
+    )
 
     dll_dirs: list[str] = []
     for root in roots:

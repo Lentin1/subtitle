@@ -15,6 +15,9 @@ public sealed class PythonWorkerClient : IAsyncDisposable
 
     private readonly string _scriptPath;
     private readonly string _pythonPath;
+    private readonly string _executablePath;
+    private readonly string _workingDirectory;
+    private readonly AppLogger _logger;
     private Process? _process;
     private StreamWriter? _stdin;
     private readonly SemaphoreSlim _writeLock = new(1, 1);
@@ -23,30 +26,41 @@ public sealed class PythonWorkerClient : IAsyncDisposable
     public event Action<string>? StatusReceived;
     public event Action<string>? ErrorReceived;
 
-    public PythonWorkerClient(string scriptPath, string pythonPath)
+    public PythonWorkerClient(string scriptPath, string pythonPath, string executablePath, string workingDirectory, AppLogger logger)
     {
         _scriptPath = scriptPath;
         _pythonPath = pythonPath;
+        _executablePath = executablePath;
+        _workingDirectory = workingDirectory;
+        _logger = logger;
     }
 
     public async Task StartAsync(AppConfig config)
     {
-        if (!File.Exists(_scriptPath))
+        var useExecutableWorker = !string.IsNullOrWhiteSpace(_executablePath);
+        if (useExecutableWorker && !File.Exists(_executablePath))
+        {
+            throw new FileNotFoundException("Worker executable not found.", _executablePath);
+        }
+
+        if (!useExecutableWorker && !File.Exists(_scriptPath))
         {
             throw new FileNotFoundException("Worker script not found.", _scriptPath);
         }
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = _pythonPath,
-            Arguments = Quote(_scriptPath),
+            FileName = useExecutableWorker ? _executablePath : _pythonPath,
+            Arguments = useExecutableWorker ? "" : Quote(_scriptPath),
             UseShellExecute = false,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
+            WorkingDirectory = _workingDirectory
         };
 
+        _logger.Info($"Starting worker: {startInfo.FileName} {startInfo.Arguments}");
         _process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start Python worker.");
         _stdin = _process.StandardInput;
         _ = Task.Run(ReadStdoutAsync);
@@ -133,6 +147,7 @@ public sealed class PythonWorkerClient : IAsyncDisposable
 
             if (!string.IsNullOrWhiteSpace(line))
             {
+                _logger.Info($"worker stderr: {line}");
                 ErrorReceived?.Invoke(line);
             }
         }
@@ -155,11 +170,15 @@ public sealed class PythonWorkerClient : IAsyncDisposable
             }
             else if (type == "status")
             {
-                StatusReceived?.Invoke(root.GetProperty("message").GetString() ?? "");
+                var message = root.GetProperty("message").GetString() ?? "";
+                _logger.Info($"worker status: {message}");
+                StatusReceived?.Invoke(message);
             }
             else if (type == "error")
             {
-                ErrorReceived?.Invoke(root.GetProperty("message").GetString() ?? "");
+                var message = root.GetProperty("message").GetString() ?? "";
+                _logger.Info($"worker error: {message}");
+                ErrorReceived?.Invoke(message);
             }
         }
         catch (JsonException)

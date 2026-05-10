@@ -12,6 +12,7 @@
   "asr": {
     "mode": "high_accuracy",
     "model": "large-v3-turbo",
+    "modelCacheDir": "models",
     "language": "ja",
     "device": "cuda",
     "computeType": "float16",
@@ -33,9 +34,19 @@
   "subtitle": {
     "fontSizeJa": 30,
     "fontSizeZh": 32,
+    "fontFamily": "Microsoft YaHei UI",
+    "fontColorJa": "#FFFFFF",
+    "fontColorZh": "#FFFFFF",
     "fontColor": "#FFFFFF",
+    "backgroundColor": "#000000",
     "backgroundEnabled": true,
     "backgroundOpacity": 0.45,
+    "cornerRadius": 8,
+    "padding": 22,
+    "lineSpacing": 8,
+    "shadowBlurRadius": 3,
+    "shadowOpacity": 0.75,
+    "textAlignment": "Center",
     "width": 960,
     "height": 170,
     "autoHideSeconds": 5
@@ -46,6 +57,7 @@
   },
   "worker": {
     "pythonPath": "python",
-    "scriptPath": "src/RealtimeSubtitle.Worker/main.py"
+    "scriptPath": "src/RealtimeSubtitle.Worker/main.py",
+    "executablePath": ""
   }
 }

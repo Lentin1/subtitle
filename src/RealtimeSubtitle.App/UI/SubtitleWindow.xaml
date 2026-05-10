@@ -19,6 +19,7 @@
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="*" />
+        <RowDefinition Height="8" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
       <TextBlock x:Name="JapaneseText"
@@ -30,7 +31,7 @@
                  TextWrapping="Wrap"
                  VerticalAlignment="Center" />
       <TextBlock x:Name="ChineseText"
-                 Grid.Row="1"
+                 Grid.Row="2"
                  Text=""
                  FontSize="32"
                  Foreground="White"

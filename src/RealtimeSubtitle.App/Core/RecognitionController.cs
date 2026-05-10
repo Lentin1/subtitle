@@ -11,6 +11,7 @@ public sealed class RecognitionController : IAsyncDisposable
     private readonly SubtitleWindow _subtitleWindow;
     private readonly AudioSessionWatcher _sessionWatcher = new();
     private readonly HotkeyService _hotkey;
+    private readonly AppLogger _logger;
     private IAudioCapture? _capture;
     private PythonWorkerClient? _worker;
     private TrayController? _tray;
@@ -23,6 +24,7 @@ public sealed class RecognitionController : IAsyncDisposable
         _config = config;
         _subtitleWindow = subtitleWindow;
         _hotkey = new HotkeyService(() => _ = ToggleAsync());
+        _logger = new AppLogger(configService.RepositoryRoot) { Enabled = config.App.DebugLog };
     }
 
     public void Initialize()
@@ -48,10 +50,17 @@ public sealed class RecognitionController : IAsyncDisposable
         try
         {
             _config = _configService.Load();
+            _logger.Enabled = _config.App.DebugLog;
+            _logger.Info("Starting recognition");
             _subtitleWindow.ApplyConfig(_config.Subtitle);
             _subtitleWindow.ShowStatus("正在启动识别...");
 
-            _worker = new PythonWorkerClient(_configService.ResolvePath(_config.Worker.ScriptPath), _config.Worker.PythonPath);
+            _worker = new PythonWorkerClient(
+                _configService.ResolveOptionalPath(_config.Worker.ScriptPath),
+                _configService.ResolveOptionalPath(_config.Worker.PythonPath),
+                _configService.ResolveOptionalPath(_config.Worker.ExecutablePath),
+                _configService.RepositoryRoot,
+                _logger);
             _worker.SubtitleReceived += OnSubtitleReceived;
             _worker.StatusReceived += status => WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(status));
             _worker.ErrorReceived += error => WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(error));
@@ -66,6 +75,7 @@ public sealed class RecognitionController : IAsyncDisposable
         }
         catch (Exception exc)
         {
+            _logger.Error("Failed to start recognition", exc);
             _subtitleWindow.ShowStatus($"启动失败: {exc.Message}");
             if (_worker is not null)
             {
@@ -82,6 +92,7 @@ public sealed class RecognitionController : IAsyncDisposable
             return;
         }
 
+        _logger.Info("Stopping recognition");
         if (_capture is not null)
         {
             _capture.AudioAvailable -= OnAudioAvailable;
@@ -115,11 +126,12 @@ public sealed class RecognitionController : IAsyncDisposable
     private void ShowSettings()
     {
         _sessionWatcher.Refresh();
-        var window = new SettingsWindow(_configService.Load(), _sessionWatcher.Apps);
+        var window = new SettingsWindow(_configService.Load(), _sessionWatcher.Apps, _configService, _logger);
         if (window.ShowDialog() == true)
         {
             _configService.Save(window.Config);
             _config = window.Config;
+            _logger.Enabled = _config.App.DebugLog;
             _subtitleWindow.ApplyConfig(_config.Subtitle);
             RegisterHotkey();
         }
@@ -153,12 +165,15 @@ public sealed class RecognitionController : IAsyncDisposable
         {
             if (_config.Audio.TargetProcessId <= 0)
             {
+                _logger.Info("Process loopback selected without a target PID");
                 throw new InvalidOperationException("请先在设置里选择目标进程。");
             }
 
+            _logger.Info($"Using process loopback for PID {_config.Audio.TargetProcessId}");
             return new ProcessLoopbackCapture(_config.Audio.TargetProcessId);
         }
 
+        _logger.Info("Using default device loopback");
         return new DeviceLoopbackCapture();
     }
 
