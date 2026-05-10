@@ -1,9 +1,9 @@
 # Build outputs
 bin/
 obj/
+publish/
 dist/
 artifacts/
-publish/
 
 # IDE and user-local state
 .vs/
@@ -24,10 +24,10 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# Runtime data
+# Runtime data and generated assets
 logs/
-*.log
 models/
+*.log
 *.wav
 *.mp3
 *.flac
@@ -44,6 +44,10 @@ config/config.*.json
 *.pfx
 *.p12
 *.crt
+
+# Local-only docs for this workspace
+realtime-subtitle-technical-design.md
+AGENTS.md
 
 # Windows
 Thumbs.db

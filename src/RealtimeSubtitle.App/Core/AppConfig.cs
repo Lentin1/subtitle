@@ -7,6 +7,7 @@ public sealed class AppConfig
     public AsrOptions Asr { get; set; } = new();
     public TranslateOptions Translate { get; set; } = new();
     public SubtitleOptions Subtitle { get; set; } = new();
+    public HotkeyOptions Hotkey { get; set; } = new();
     public WorkerOptions Worker { get; set; } = new();
 }
 
@@ -19,6 +20,8 @@ public sealed class AppOptions
 public sealed class AudioOptions
 {
     public string Mode { get; set; } = "device_loopback";
+    public string TargetApp { get; set; } = "";
+    public bool AutoRefreshApps { get; set; } = true;
 }
 
 public sealed class AsrOptions
@@ -62,4 +65,10 @@ public sealed class WorkerOptions
 {
     public string PythonPath { get; set; } = "python";
     public string ScriptPath { get; set; } = "src/RealtimeSubtitle.Worker/main.py";
+}
+
+public sealed class HotkeyOptions
+{
+    public bool Enabled { get; set; } = true;
+    public string ToggleRecognition { get; set; } = "F8";
 }

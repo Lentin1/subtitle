@@ -2,7 +2,7 @@ using NAudio.Wave;
 
 namespace RealtimeSubtitle.App.Audio;
 
-public sealed class DeviceLoopbackCapture : IDisposable
+public sealed class DeviceLoopbackCapture : IAudioCapture
 {
     private WasapiLoopbackCapture? _capture;
 

@@ -9,7 +9,9 @@ public sealed class RecognitionController : IAsyncDisposable
 {
     private readonly ConfigService _configService;
     private readonly SubtitleWindow _subtitleWindow;
-    private readonly DeviceLoopbackCapture _capture = new();
+    private readonly AudioSessionWatcher _sessionWatcher = new();
+    private readonly HotkeyService _hotkey;
+    private IAudioCapture? _capture;
     private PythonWorkerClient? _worker;
     private TrayController? _tray;
     private AppConfig _config;
@@ -20,13 +22,15 @@ public sealed class RecognitionController : IAsyncDisposable
         _configService = configService;
         _config = config;
         _subtitleWindow = subtitleWindow;
-        _capture.AudioAvailable += OnAudioAvailable;
+        _hotkey = new HotkeyService(() => _ = ToggleAsync());
     }
 
     public void Initialize()
     {
         _tray = new TrayController(StartAsync, StopAsync, ShowSubtitle, HideSubtitle, ShowSettings, ExitAsync);
         _tray.SetRunning(false);
+        _sessionWatcher.Start();
+        RegisterHotkey();
 
         if (_config.App.AutoStart)
         {
@@ -53,10 +57,12 @@ public sealed class RecognitionController : IAsyncDisposable
             _worker.ErrorReceived += error => WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.ShowStatus(error));
 
             await _worker.StartAsync(_config);
+            _capture = CreateCapture();
+            _capture.AudioAvailable += OnAudioAvailable;
             _capture.Start();
             _isRunning = true;
             _tray?.SetRunning(true);
-            _subtitleWindow.ShowStatus("正在监听系统声音");
+            _subtitleWindow.ShowStatus(GetListeningStatus());
         }
         catch (Exception exc)
         {
@@ -76,7 +82,13 @@ public sealed class RecognitionController : IAsyncDisposable
             return;
         }
 
-        _capture.Stop();
+        if (_capture is not null)
+        {
+            _capture.AudioAvailable -= OnAudioAvailable;
+            _capture.Stop();
+            _capture.Dispose();
+            _capture = null;
+        }
         if (_worker is not null)
         {
             await _worker.SendControlAsync("stop");
@@ -102,12 +114,14 @@ public sealed class RecognitionController : IAsyncDisposable
 
     private void ShowSettings()
     {
-        var window = new SettingsWindow(_configService.Load());
+        _sessionWatcher.Refresh();
+        var window = new SettingsWindow(_configService.Load(), _sessionWatcher.Apps);
         if (window.ShowDialog() == true)
         {
             _configService.Save(window.Config);
             _config = window.Config;
             _subtitleWindow.ApplyConfig(_config.Subtitle);
+            RegisterHotkey();
         }
     }
 
@@ -133,10 +147,61 @@ public sealed class RecognitionController : IAsyncDisposable
         WpfApplication.Current.Dispatcher.Invoke(() => _subtitleWindow.UpdateSubtitle(subtitle.Japanese, subtitle.Chinese));
     }
 
+    private IAudioCapture CreateCapture()
+    {
+        if (string.Equals(_config.Audio.Mode, "process_loopback", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ProcessLoopbackCapture(_sessionWatcher, () => _config.Audio.TargetApp);
+        }
+
+        return new DeviceLoopbackCapture();
+    }
+
+    private string GetListeningStatus()
+    {
+        if (string.Equals(_config.Audio.Mode, "process_loopback", StringComparison.OrdinalIgnoreCase) &&
+            !string.IsNullOrWhiteSpace(_config.Audio.TargetApp))
+        {
+            return $"正在监听应用声音: {_config.Audio.TargetApp}";
+        }
+
+        return "正在监听系统声音";
+    }
+
+    private async Task ToggleAsync()
+    {
+        if (_isRunning)
+        {
+            await StopAsync();
+        }
+        else
+        {
+            await StartAsync();
+        }
+    }
+
+    private void RegisterHotkey()
+    {
+        if (_config.Hotkey.Enabled)
+        {
+            _hotkey.Register(_config.Hotkey.ToggleRecognition);
+        }
+        else
+        {
+            _hotkey.Unregister();
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
-        _capture.AudioAvailable -= OnAudioAvailable;
-        _capture.Dispose();
+        if (_capture is not null)
+        {
+            _capture.AudioAvailable -= OnAudioAvailable;
+            _capture.Dispose();
+        }
+
+        _hotkey.Dispose();
+        _sessionWatcher.Dispose();
         _tray?.Dispose();
         if (_worker is not null)
         {

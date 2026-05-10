@@ -4,7 +4,9 @@
     "debugLog": false
   },
   "audio": {
-    "mode": "device_loopback"
+    "mode": "device_loopback",
+    "targetApp": "",
+    "autoRefreshApps": true
   },
   "asr": {
     "mode": "high_accuracy",
@@ -36,6 +38,10 @@
     "width": 960,
     "height": 170,
     "autoHideSeconds": 5
+  },
+  "hotkey": {
+    "enabled": true,
+    "toggleRecognition": "F8"
   },
   "worker": {
     "pythonPath": "python",
