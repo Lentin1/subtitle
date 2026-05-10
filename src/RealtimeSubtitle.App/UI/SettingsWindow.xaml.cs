@@ -23,8 +23,28 @@ public partial class SettingsWindow : Window
         TargetAppBox.Items.Clear();
         foreach (var app in apps)
         {
-            var label = app.IsActive ? $"{app.DisplayName} ({app.ProcessName}, 活动)" : $"{app.DisplayName} ({app.ProcessName})";
-            TargetAppBox.Items.Add(new WpfComboBoxItem { Content = label, Tag = app.ProcessName });
+            var label = app.IsActive
+                ? $"{app.DisplayName} ({app.ProcessName}, PID {app.ProcessId}, 活动)"
+                : $"{app.DisplayName} ({app.ProcessName}, PID {app.ProcessId})";
+            TargetAppBox.Items.Add(new WpfComboBoxItem { Content = label, Tag = app.ProcessId });
+        }
+
+        if (Config.Audio.TargetProcessId > 0)
+        {
+            SelectTag(TargetAppBox, Config.Audio.TargetProcessId);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(Config.Audio.TargetApp))
+        {
+            var match = apps.FirstOrDefault(app =>
+                string.Equals(app.ProcessName, Config.Audio.TargetApp, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(app.DisplayName, Config.Audio.TargetApp, StringComparison.OrdinalIgnoreCase));
+
+            if (match is not null)
+            {
+                SelectTag(TargetAppBox, match.ProcessId);
+            }
         }
     }
 
@@ -32,6 +52,10 @@ public partial class SettingsWindow : Window
     {
         SelectTag(AudioModeBox, config.Audio.Mode);
         TargetAppBox.Text = config.Audio.TargetApp;
+        if (config.Audio.TargetProcessId > 0)
+        {
+            SelectTag(TargetAppBox, config.Audio.TargetProcessId);
+        }
 
         ModelText.Text = config.Asr.Model;
         SelectContent(DeviceBox, config.Asr.Device);
@@ -61,6 +85,7 @@ public partial class SettingsWindow : Window
     private void Save_OnClick(object sender, RoutedEventArgs e)
     {
         Config.Audio.Mode = ReadSelectedTag(AudioModeBox, "device_loopback");
+        Config.Audio.TargetProcessId = ReadTargetProcessId();
         Config.Audio.TargetApp = ReadTargetApp();
 
         Config.Asr.Model = ModelText.Text.Trim();
@@ -91,12 +116,30 @@ public partial class SettingsWindow : Window
 
     private string ReadTargetApp()
     {
-        if (TargetAppBox.SelectedItem is WpfComboBoxItem item && item.Tag is string tag)
+        if (TargetAppBox.SelectedItem is WpfComboBoxItem item)
         {
-            return tag;
+            return item.Content?.ToString() ?? "";
         }
 
         return TargetAppBox.Text.Trim();
+    }
+
+    private int ReadTargetProcessId()
+    {
+        if (TargetAppBox.SelectedItem is WpfComboBoxItem item)
+        {
+            if (item.Tag is int intTag)
+            {
+                return intTag;
+            }
+
+            if (item.Tag is string stringTag && int.TryParse(stringTag, out var parsedTag))
+            {
+                return parsedTag;
+            }
+        }
+
+        return int.TryParse(TargetAppBox.Text.Trim(), out var value) ? value : 0;
     }
 
     private void Cancel_OnClick(object sender, RoutedEventArgs e)
@@ -109,6 +152,26 @@ public partial class SettingsWindow : Window
         foreach (var item in comboBox.Items.OfType<WpfComboBoxItem>())
         {
             if (string.Equals(item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
+            {
+                comboBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        comboBox.SelectedIndex = 0;
+    }
+
+    private static void SelectTag(WpfComboBox comboBox, int tag)
+    {
+        foreach (var item in comboBox.Items.OfType<WpfComboBoxItem>())
+        {
+            if (item.Tag is int intTag && intTag == tag)
+            {
+                comboBox.SelectedItem = item;
+                return;
+            }
+
+            if (int.TryParse(item.Tag?.ToString(), out var parsed) && parsed == tag)
             {
                 comboBox.SelectedItem = item;
                 return;
